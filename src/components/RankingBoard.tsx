@@ -244,3 +244,12 @@ export default function RankingBoard({
     </div>
   );
 }
+useEffect(() => {
+  setDoc(doc(db, 'scores', 'test_user'), {
+    userId: 'test_user',
+    nickname: '테스트유저',
+    characterId: 'viajero',
+    level: 10,
+    updatedAt: serverTimestamp()
+  });
+}, []);
