@@ -1,0 +1,39 @@
+{
+  "entities": {
+    "Score": {
+      "title": "Score",
+      "description": "User learning progress score information for leaderboards",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Unique identifier of the player user"
+        },
+        "nickname": {
+          "type": "string",
+          "description": "A customized user nickname"
+        },
+        "characterId": {
+          "type": "string",
+          "description": "The selected avatar character identifier"
+        },
+        "level": {
+          "type": "number",
+          "description": "Current staircase level that player climbed"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp indicating when the score was updated"
+        }
+      },
+      "required": ["userId", "nickname", "characterId", "level", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/scores/{userId}": {
+      "schema": "Score",
+      "description": "Collection storing current stair level and ranking results for participants"
+    }
+  }
+}

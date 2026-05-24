@@ -1,0 +1,6 @@
+{
+  "name": "스페인어 계단 RPG",
+  "description": "학교 계단을 오르며 귀여운 캐릭터들과 함께 단어와 문장을 마스터하는 레벨업 스페인어 학습 게임!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

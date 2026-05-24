@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Base Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 64 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Validation Blueprint for the Score schema
+    function isValidScore(data) {
+      return data.userId is string 
+        && data.userId.size() <= 64
+        && data.nickname is string 
+        && data.nickname.size() >= 1 
+        && data.nickname.size() <= 32
+        && data.characterId is string
+        && (data.characterId == 'viajero' || data.characterId == 'flamenco' || data.characterId == 'churrero' || data.characterId == 'futbolista')
+        && data.level is int
+        && data.level >= 1
+        && data.level <= 30
+        && data.updatedAt is timestamp;
+    }
+
+    // 3. Scores Collection
+    match /scores/{userId} {
+      // Leaderboard query permissions
+      allow list, get: if isSignedIn();
+
+      allow create: if isOwner(userId)
+        && isValidId(userId)
+        && request.resource.data.keys().hasAll(['userId', 'nickname', 'characterId', 'level', 'updatedAt'])
+        && request.resource.data.keys().size() == 5
+        && isValidScore(request.resource.data)
+        && request.resource.data.userId == userId
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if isOwner(userId)
+        && isValidId(userId)
+        && request.resource.data.keys().hasAll(['userId', 'nickname', 'characterId', 'level', 'updatedAt'])
+        && request.resource.data.keys().size() == 5
+        && isValidScore(request.resource.data)
+        && request.resource.data.userId == userId
+        && request.resource.data.userId == resource.data.userId // Prevent identity spoofing
+        && request.resource.data.updatedAt == request.time       // Enforce server timestamp
+        && request.resource.data.diff(resource.data).affectedKeys().hasAny(['nickname', 'characterId', 'level', 'updatedAt']);
+
+      allow delete: if isOwner(userId);
+    }
+  }
+}
